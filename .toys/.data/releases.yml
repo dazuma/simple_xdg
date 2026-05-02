@@ -1,0 +1,10 @@
+repo: dazuma/simple_xdg
+git_user_name: Daniel Azuma
+git_user_email: dazuma@gmail.com
+required_checks: false
+update_existing_requests: true
+issue_number_suffix_handling: delete
+
+gems:
+  - name: simple_xdg
+    gh_pages_directory: gem
