@@ -1,7 +1,7 @@
 # SimpleXDG
 
 `SimpleXDG` is a no-frills Ruby class implementing the XDG Base Directory
-Specification. This spech defines where certain user-specific application
+Specification. This spec defines where certain user-specific application
 files, such as configuration, cache, and saved state, should live on the user's
 file system. It specifies environment variables that contain this information,
 and defaults that should be used if those environment variables are unset. The
