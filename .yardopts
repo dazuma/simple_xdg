@@ -3,7 +3,8 @@
 --markup=markdown
 --markup-provider redcarpet
 --main=README.md
-./lib/exec_service.rb
+./lib/simple_xdg/**/*.rb
+./lib/simple_xdg.rb
 -
 README.md
 LICENSE.md
