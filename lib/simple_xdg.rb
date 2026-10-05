@@ -57,10 +57,16 @@ class SimpleXDG
   ##
   # Returns the absolute path to the current user's home directory.
   #
+  # Uses the value of the `$HOME` environment variable if it is an absolute
+  # path, otherwise falls back to the system's notion of the home directory.
+  # If no home directory can be determined (for example, when `$HOME` is
+  # unset and the current user has no passwd entry, as can happen in a
+  # container run under an arbitrary UID), returns the filesystem root `"/"`.
+  #
   # @return [String]
   #
   def home_dir
-    @home_dir ||= validate_dir_env("HOME") || ::Dir.home
+    @home_dir ||= validate_dir_env("HOME") || safe_home_dir
   end
 
   ##
@@ -360,6 +366,20 @@ class SimpleXDG
   def validate_dir_env(name)
     path = @env[name].to_s
     ::File.absolute_path?(path) ? path : nil
+  end
+
+  ##
+  # Get `Dir.home` with a fallback for the rare case where it raises due to
+  # there not being a home directory. The error case can be triggered, for
+  # example, by running a container under a UID with no passwd entry, where
+  # `$HOME` is explicitly unset. Also falls back if `Dir.home` returns a
+  # non-absolute path, which can happen if `$HOME` is empty or relative.
+  #
+  def safe_home_dir
+    home = ::Dir.home
+    ::File.absolute_path?(home) ? home : "/"
+  rescue ::ArgumentError
+    "/"
   end
 
   ##
