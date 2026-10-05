@@ -20,6 +20,50 @@ describe SimpleXDG do
   let(:default_cache_home) { File.join(home_dir, ".cache") }
   let(:default_executable_home) { File.join(home_dir, ".local", "bin") }
 
+  describe "#home_dir" do
+    let(:home_error) { ::ArgumentError.new("couldn't find home for uid '12345'") }
+
+    it "honors HOME" do
+      assert_equal(home_dir, xdg.home_dir)
+    end
+
+    it "falls back to the system home directory if HOME is unset" do
+      ::Dir.stub(:home, workspace_dir) do
+        xdg = SimpleXDG.new(env: {})
+        assert_equal(workspace_dir, xdg.home_dir)
+      end
+    end
+
+    it "falls back to the system home directory if HOME is not absolute" do
+      ::Dir.stub(:home, workspace_dir) do
+        xdg = SimpleXDG.new(env: { "HOME" => "relative" })
+        assert_equal(workspace_dir, xdg.home_dir)
+      end
+    end
+
+    it "falls back to / if the system home directory cannot be determined" do
+      ::Dir.stub(:home, ->(*) { raise home_error }) do
+        xdg = SimpleXDG.new(env: {})
+        assert_equal("/", xdg.home_dir)
+        assert_equal("/.config", xdg.config_home)
+      end
+    end
+
+    it "falls back to / if the system home directory is not absolute" do
+      ::Dir.stub(:home, "relative") do
+        xdg = SimpleXDG.new(env: { "HOME" => "relative" })
+        assert_equal("/", xdg.home_dir)
+      end
+    end
+
+    it "falls back to / if the system home directory is empty" do
+      ::Dir.stub(:home, "") do
+        xdg = SimpleXDG.new(env: { "HOME" => "" })
+        assert_equal("/", xdg.home_dir)
+      end
+    end
+  end
+
   describe "#data_home" do
     it "honors XDG_DATA_HOME" do
       custom_dir = File.join(workspace_dir, "data")
